@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="content-container">
+    <h1>Arama Sonuçları</h1>
+    <form method="get" action="/search"> 
+        <input type="text" id="search_input" name="search_query" placeholder="Kelime ara...">
+        <button type="submit">Ara</button>
+    </form>
+
+    {% if results %}
+        <div class="results-container">
+            <h2>Bulunan Sonuçlar</h2>
+            <ul>
+                {% for item in results %}
+                <li>
+                    <strong onclick="toggleDetails('details-{{ forloop.counter0 }}')">Title: {{ item.title }}</strong>
+                    <div id="details-{{ forloop.counter0 }}" class="details" style="display: none;">
+                        <p>Filename: {{ item.filename }}</p>
+                        <p>Summary: {{ item.summary }}</p>
+                        <p>Keywords: {{ item.key_content }}</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <p>Sonuç bulunamadı veya arama yapmadınız.</p>
+    {% endif %}
+</div>
+
+<script>
+    function toggleDetails(detailsId) {
+        const detailsDiv = document.getElementById(detailsId);
+        if (detailsDiv.style.display === 'none') {
+            detailsDiv.style.display = 'block';
+        } else {
+            detailsDiv.style.display = 'none';
+        }
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('search_input');
+        const suggestionsBox = document.getElementById('suggestions');
+
+        searchInput.addEventListener('input', function () {
+            const query = this.value;
+            if (query.length > 2) {  // Minimum karakter sayısı
+                // Datamuse API kullanarak önerileri getir
+                fetch(`https://api.datamuse.com/sug?s=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestionsBox.innerHTML = '';
+                    data.forEach(function (item) {
+                        const div = document.createElement('div');
+                        div.textContent = item.word;
+                        div.style.padding = '10px';
+                        div.style.borderBottom = '1px solid #ccc';
+                        div.onclick = function () {
+                            searchInput.value = item.word;
+                            suggestionsBox.innerHTML = '';
+                        };
+                        suggestionsBox.appendChild(div);
+                    });
+                });
+            } else {
+                suggestionsBox.innerHTML = '';
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block css %}
+<style>
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url("{% static 'img/wp12478902-japanese-art-4k-wallpapers.jpg' %}") no-repeat center center fixed;
+    background-size: cover;
+}
+    .content-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #c798d8;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(194, 124, 202, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+    h1, h2 {
+        color: #9a4db1;
+        text-align: center;
+    }
+    input, button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #c798d8;
+        border-radius: 5px;
+    }
+    button {
+        background-color: #c798d8;
+        color: white;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #a56cb1;
+    }
+    #suggestions div:hover {
+        background-color: #eaeaea;
+    }
+    .results-container {
+        overflow-y: auto;
+        max-height: calc(100vh - 200px); /* Form ve başlıklar için yer bırak */
+        width: 100%;
+    }
+    .details {
+        margin-left: 20px;
+        margin-top: 10px;
+    }
+    .details p {
+        margin: 5px 0;
+    }
+    @media (max-width: 600px) {
+        .content-container {
+            padding: 10px;
+        }
+        h1, h2 {
+            font-size: 16px;
+        }
+    }
+</style>
+{% endblock %}

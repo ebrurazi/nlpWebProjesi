@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="center-form">
+    <h2>WELCOME!</h2>
+    <div class="button-container">
+        <a href="{% url 'login' %}" class="button">LOGIN</a>
+        <a href="{% url 'signup' %}" class="button">REGISTER</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+<style>
+    body, html {
+        height: 100%; /* Set the height of the HTML and body to cover the entire viewport */
+        margin: 0; /* Remove default margin */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: url("{% static 'img/wp12478902-japanese-art-4k-wallpapers.jpg' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+    .center-form {
+        width: 90%; /* Adjust width based on content size */
+        max-width: 800px; /* Maximum width */
+        padding: 50px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px solid #c798d8; /* Soft purple border */
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(194, 124, 202, 0.2); /* Light purple shadows */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center the form elements */
+        backdrop-filter: blur(10px);
+    }
+    h2 {
+        color: #9a4db1; /* Dark purple color for the heading */
+        text-align: center;
+        font-size: 2.5em; /* Larger font size for the heading */
+    }
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        align-items: center; /* Center the buttons horizontally */
+    }
+    .button {
+        width: 80%; /* Make buttons take up 80% of the container's width */
+        max-width: 300px; /* Maximum width for buttons */
+        padding: 20px 40px; /* Adjust padding for larger buttons */
+        background: linear-gradient(135deg, #c798d8, #a56cb1);
+        background-size: 400% 400%;
+        animation: glitter 3s ease infinite, blink 1.5s infinite;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none; /* Remove underline */
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        font-size: 1.5em; /* Larger font size for the buttons */
+        margin: 15px 0; /* Add vertical margin between buttons */
+        display: flex;
+        justify-content: center; /* Center text horizontally */
+        align-items: center; /* Center text vertically */
+        text-align: center; /* Ensure text is centered */
+    }
+    .button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('https://www.transparenttextures.com/patterns/diamond-upholstery.png') repeat; /* Simli arka plan görüntüsü */
+        background-size: 25px 25px; /* Sim deseninin boyutu */
+        opacity: 0.5; /* Simlerin görünürlüğü */
+        pointer-events: none;
+        animation: glitter 3s linear infinite; /* Glitter effect */
+    }
+    .button:hover {
+        background: linear-gradient(135deg, #a56cb1, #c798d8);
+    }
+    @keyframes glitter {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+    @keyframes blink {
+        0%, 100% {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.7);
+        }
+        50% {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 40px rgba(255, 255, 255, 0.9);
+        }
+    }
+</style>
+{% endblock %}

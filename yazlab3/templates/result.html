@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="center-form">
+    <h2>Arama Sonuçları</h2>
+    <p>Aranan kelime: "{{ search_query }}"</p>
+    {% if recommended_articles %}
+        <ul>
+            {% for article in recommended_articles %}
+                <li>{{ article.title }} - Okumak için <a href="{{ article.get_absolute_url }}">tıklayın</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Burada, "{{ search_query }}" ile ilgili sonuçlar gösterilecektir.</p>
+        <p>Öneri bulunamadı.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block css %}
+<style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        background-color: #f8d7e9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .center-form {
+        width: auto;
+        max-width: 600px;
+        padding: 25px;
+        background-color: #f8d7e9;
+        border: 2px solid #c798d8;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(194, 124, 202, 0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    h2 {
+        color: #9a4db1;
+        text-align: center;
+    }
+</style>
+{% endblock %}

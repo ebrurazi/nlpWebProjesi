@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8d7e9;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        .welcome {
+            font-size: 24px;
+            color: #9a4db1;
+        }
+        .actions {
+            display: flex;
+            gap: 15px;
+        }
+        .actions a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            background-color: #c798d8;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .actions a:hover {
+            background-color: #0056b3;
+        }
+        .content-container {
+            flex-grow: 1;
+            padding: 20px;
+            background-color: #f8d7e9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1, h2 {
+            color: #9a4db1;
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #c798d8;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #c798d8;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #a56cb1;
+        }
+        #suggestions div:hover {
+            background-color: #eaeaea;
+        }
+        .content-container strong {
+            cursor: pointer;
+            color: #333;
+            text-decoration: none;
+        }
+        .content-container strong:hover {
+            color: #555;
+            text-decoration: underline;
+        }
+        .icon {
+            padding: 0 5px;
+            cursor: pointer;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+        .icon.approve:hover {
+            color: green;
+        }
+        .icon.delete:hover {
+            color: red;
+        }
+        @media (max-width: 600px) {
+            .content-container {
+                padding: 10px;
+            }
+            h1, h2 {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="welcome">
+            Hoşgeldiniz, {{ username }}!
+        </div>
+        <div class="actions">
+            <a href="{% url 'logout' %}">Çıkış Yap</a>
+            <a href="{% url 'update_profile' %}">Bilgileri Güncelle</a>
+        </div>
+    </div>
+
+    {% csrf_token %}
+            <form method="get" action="/search">  <!-- Form verilerini /search/ URL'sine gönder -->
+                <input type="text" id="search_input" name="search_query" placeholder="Kelime ara...">
+                <button type="submit">Ara</button>
+            </form>
+    <div class="content-container">
+        
+        
+            
+        <div class="recommendations-container">
+            <div class="fasttext">
+                <div class="recommendations-container">
+                    <div class="fasttext">
+                        <h2>FastText Önerileri</h2>
+                        <p>Precision: <span id="fasttext-precision">{{ fasttext_precision|floatformat:2 }}</span></p>
+                        <p>Recall: <span id="fasttext-recall">{{ fasttext_recall|floatformat:2 }}</span></p>
+                        {% if fasttext_texts %}
+                        <ul id="fasttext-list">
+                            {% for similarity, title, summary, keywords, article_id in fasttext_texts %}
+                            <li id="fasttext-{{ article_id }}">
+                                {% url 'article_detail' article_id=article_id as detail_url %}
+                                <a href="javascript:void(0);" onclick="updateUserVectorAndNavigate('{{ article_id }}', '{{ detail_url }}', 'fasttext')"><strong>{{ title }}</strong></a> (Benzerlik Skoru: {{ similarity }})
+                                <div class="details" style="display:none;">
+                                    <p><strong>Özet:</strong> {{ summary }}</p>
+                                    <p><strong>Anahtar Kelimeler:</strong> {{ keywords }}</p>
+                                </div>
+                                <span class="icon approve" onclick="updateInterestAndRecommendations('{{ article_id }}', 'fasttext', 'positive')">&#10003;</span>
+                                <span class="icon delete" onclick="replaceArticle('{{ article_id }}', 'fasttext')">&#10005;</span>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>Öneri bulunamadı.</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="scibert">
+                        <h2>SciBERT Önerileri</h2>
+                        <p>Precision: <span id="scibert-precision">{{ scibert_precision|floatformat:2 }}</span></p>
+                        <p>Recall: <span id="scibert-recall">{{ scibert_recall|floatformat:2 }}</span></p>
+                        {% if scibert_texts %}
+                        <ul id="scibert-list">
+                            {% for similarity, title, summary, keywords, article_id in scibert_texts %}
+                            <li id="scibert-{{ article_id }}">
+                                {% url 'article_detail' article_id=article_id as detail_url %}
+                                <a href="javascript:void(0);" onclick="updateUserVectorAndNavigate('{{ article_id }}', '{{ detail_url }}', 'scibert')"><strong>{{ title }}</strong></a> (Benzerlik Skoru: {{ similarity }})
+                                <div class="details" style="display:none;">
+                                    <p><strong>Özet:</strong> {{ summary }}</p>
+                                    <p><strong>Anahtar Kelimeler:</strong> {{ keywords }}</p>
+                                </div>
+                                <span class="icon approve" onclick="updateInterestAndRecommendations('{{ article_id }}', 'scibert', 'positive')">&#10003;</span>
+                                <span class="icon delete" onclick="replaceArticle('{{ article_id }}', 'scibert')">&#10005;</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>Öneri bulunamadı.</p>
+                        {% endif %}
+                    </div>
+                    
+        </div>
+    </div>
+
+    <script>
+    function toggleDetails(detailsDiv) {
+        if (detailsDiv.style.display === 'none') {
+            detailsDiv.style.display = 'block';
+            } else {
+            detailsDiv.style.display = 'none';
+            }
+        }
+
+    function updateUserVectorAndNavigate(articleId, url, modelType) {
+        const updateUrl = `/update-user-vector/${articleId}/`;
+        const data = new FormData();
+        data.append('model_type', modelType);
+
+        fetch(updateUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: data
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Sayfadaki makaleleri ve precision değerlerini güncelle
+                document.getElementById('fasttext-list').innerHTML = '';
+                document.getElementById('scibert-list').innerHTML = '';
+
+                data.fasttext_texts.forEach(item => {
+                    const newArticleHTML = `
+                        <li id="fasttext-${item[4]}">
+                            <a href="javascript:void(0);" onclick="updateUserVectorAndNavigate('${item[4]}', '/article/${item[4]}/', 'fasttext')"><strong>${item[1]}</strong></a> (Benzerlik Skoru: ${item[0]})
+                            <div class="details" style="display:none;">
+                                <p><strong>Özet:</strong> ${item[2]}</p>
+                                <p><strong>Anahtar Kelimeler:</strong> ${item[3]}</p>
+                            </div>
+                            <span class="icon approve" onclick="updateInterestAndRecommendations('${item[4]}', 'fasttext', 'positive')">&#10003;</span>
+                            <span class="icon delete" onclick="replaceArticle('${item[4]}', 'fasttext')">&#10005;</span>
+                        </li>`;
+                    document.getElementById('fasttext-list').innerHTML += newArticleHTML;
+                });
+
+                data.scibert_texts.forEach(item => {
+                    const newArticleHTML = `
+                        <li id="scibert-${item[4]}">
+                            <a href="javascript:void(0);" onclick="updateUserVectorAndNavigate('${item[4]}', '/article/${item[4]}/', 'scibert')"><strong>${item[1]}</strong></a> (Benzerlik Skoru: ${item[0]})
+                            <div class="details" style="display:none;">
+                                <p><strong>Özet:</strong> ${item[2]}</p>
+                                <p><strong>Anahtar Kelimeler:</strong> ${item[3]}</p>
+                            </div>
+                            <span class="icon approve" onclick="updateInterestAndRecommendations('${item[4]}', 'scibert', 'positive')">&#10003;</span>
+                            <span class="icon delete" onclick="replaceArticle('${item[4]}', 'scibert')">&#10005;</span>
+                        </li>`;
+                    document.getElementById('scibert-list').innerHTML += newArticleHTML;
+                });
+
+                document.getElementById('fasttext-precision').textContent = data.fasttext_precision.toFixed(2);
+                document.getElementById('fasttext-recall').textContent = data.fasttext_recall.toFixed(2);
+                document.getElementById('scibert-precision').textContent = data.scibert_precision.toFixed(2);
+                document.getElementById('scibert-recall').textContent = data.scibert_recall.toFixed(2);
+
+                // Yeni sayfaya yönlendir
+                window.location.href = url;
+            } else {
+                alert('Error updating user vector: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating user vector.');
+        });
+    }
+
+    function updateInterestAndRecommendations(articleId, modelType, feedbackType) {
+        const url = `/update-interest-and-recommendations/${articleId}/`;
+        const data = new FormData();
+        data.append('feedback_type', feedbackType);
+        data.append('model_type', modelType);
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: data
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Recommendations updated!');
+                if (data.fasttext_texts && data.scibert_texts) {
+                    // Eski önerileri temizle
+                    document.getElementById('fasttext-list').innerHTML = '';
+                    document.getElementById('scibert-list').innerHTML = '';
+
+                    // Yeni önerileri ekle
+                    const fasttext_texts = data.fasttext_texts;
+                    const scibert_texts = data.scibert_texts;
+
+                    fasttext_texts.forEach(item => {
+                        const detailUrl = `/article/${item[4]}/`;
+                        const newArticleHTML = `
+                            <li id="fasttext-${item[4]}">
+                                <a href="javascript:void(0);" onclick="updateUserVectorAndNavigate('${item[4]}', '${detailUrl}')"><strong>${item[1]}</strong></a> (Benzerlik Skoru: ${item[0]})
+                            </li>`;
+                        document.getElementById('fasttext-list').innerHTML += newArticleHTML;
+                    });
+
+                    scibert_texts.forEach(item => {
+                        const detailUrl = `/article/${item[4]}/`;
+                        const newArticleHTML = `
+                            <li id="scibert-${item[4]}">
+                                <a href="javascript:void(0);" onclick="updateUserVectorAndNavigate('${item[4]}', '${detailUrl}')"><strong>${item[1]}</strong></a> (Benzerlik Skoru: ${item[0]})
+                            </li>`;
+                        document.getElementById('scibert-list').innerHTML += newArticleHTML;
+                    });
+
+                    // Precision ve recall değerlerini güncelle
+                    document.getElementById('fasttext-precision').textContent = data.fasttext_precision.toFixed(2);
+                    document.getElementById('fasttext-recall').textContent = data.fasttext_recall.toFixed(2);
+                    document.getElementById('scibert-precision').textContent = data.scibert_precision.toFixed(2);
+                    document.getElementById('scibert-recall').textContent = data.scibert_recall.toFixed(2);
+                }
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating recommendations.');
+        });
+    }
+
+    function replaceArticle(articleId, modelType) {
+        const url = `/replace-article/${articleId}/${modelType}/`;
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Article removed from interests!');
+                const articleElement = document.getElementById(`${modelType}-${articleId}`);
+                if (articleElement) {
+                    articleElement.remove();
+                }
+
+                const newArticle = data.article;
+                const detailUrl = `/article/${newArticle[4]}/`;
+                const newArticleHTML = `
+                    <li id="${modelType}-${newArticle[4]}">
+                        <a href="javascript:void(0);" onclick="updateUserVectorAndNavigate('${newArticle[4]}', '${detailUrl}')"><strong>${newArticle[1]}</strong></a> (Benzerlik Skoru: ${newArticle[0]})
+                    </li>`;
+
+                document.getElementById(`${modelType}-list`).innerHTML += newArticleHTML;
+
+                // Precision ve recall değerlerini güncelle
+                document.getElementById('fasttext-precision').textContent = data.fasttext_precision.toFixed(2);
+                document.getElementById('fasttext-recall').textContent = data.fasttext_recall.toFixed(2);
+                document.getElementById('scibert-precision').textContent = data.scibert_precision.toFixed(2);
+                document.getElementById('scibert-recall').textContent = data.scibert_recall.toFixed(2);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error replacing article.');
+        });
+    }
+
+    </script>
+</body>
+</html>
+
+
+<style>
+   body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8d7e9;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.8);
+        color: white;
+        backdrop-filter: blur(10px);
+    }
+    .welcome {
+        font-size: 24px;
+        color: #9a4db1;
+    }
+    .actions {
+        display: flex;
+        gap: 15px;
+    }
+    .actions a {
+        color: white;
+        text-decoration: none;
+        padding: 10px 15px;
+        background-color: #c798d8;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .actions a:hover {
+        background-color: #0056b3;
+    }
+    .content-container {
+        flex-grow: 1;
+        padding: 20px;
+        background-color: #f8d7e9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    h1, h2 {
+        color: #9a4db1;
+        text-align: center;
+    }
+    input, button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #c798d8;
+        border-radius: 5px;
+    }
+    button {
+        background-color: #c798d8;
+        color: white;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #a56cb1;
+    }
+    #suggestions div:hover {
+        background-color: #eaeaea;
+    }
+    .content-container strong {
+        cursor: pointer;
+        color: #333;
+        text-decoration: none;
+    }
+    .content-container strong:hover {
+        color: #555;
+        text-decoration: underline;
+    }
+    .icon {
+        padding: 0 5px;
+        cursor: pointer;
+        font-size: 20px;
+        vertical-align: middle;
+    }
+    .icon.approve:hover {
+        color: green;
+    }
+    .icon.delete:hover {
+        color: red;
+    }
+    body, html {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: url("{% static 'img/wp12478902-japanese-art-4k-wallpapers.jpg' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+    .content-container {
+        width: 100%;
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px solid #c798d8;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(194, 124, 202, 0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        backdrop-filter: blur(10px);
+    }
+    h1, h2 {
+        color: #9a4db1;
+        text-align: center;
+    }
+    input, button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #c798d8;
+        border-radius: 5px;
+    }
+    button {
+        background-color: #c798d8;
+        color: white;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #a56cb1;
+    }
+    #suggestions div:hover {
+        background-color: #eaeaea;
+    }
+    .content-container strong {
+        cursor: pointer;
+        color: #333;
+        text-decoration: none;
+    }
+    .content-container strong:hover {
+        color: #555;
+        text-decoration: underline;
+    }
+    @media (max-width: 600px) {
+        .content-container {
+            padding: 10px;
+        }
+        h1, h2 {
+            font-size: 16px;
+        }
+    }
+
+</style>
+</body>
+</html>

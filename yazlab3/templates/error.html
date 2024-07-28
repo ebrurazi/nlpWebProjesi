@@ -1,0 +1,39 @@
+<!-- templates/error.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8d7e9;
+            color: #9a4db1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .error-container {
+            text-align: center;
+            border: 2px solid #c798d8;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #fff;
+        }
+        h1 {
+            margin-top: 0;
+        }
+        p {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>Oops! An error occurred</h1>
+        <p>{{ message }}</p>
+    </div>
+</body>
+</html>

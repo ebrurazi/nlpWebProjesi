@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="center-form">
+    <h2>{{ title }}</h2>
+    <p><strong>ABSTRACT:</strong> {{ summary }}</p>
+    <p><strong>KEYWORDS:</strong> {{ keywords }}</p>
+</div>
+{% endblock %}
+
+{% block css %}
+<style>
+    body, html {
+        height: 100%; /* Set the height of the HTML and body to cover the entire viewport */
+        margin: 0; /* Remove default margin */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: url("{% static 'img/wp12478902-japanese-art-4k-wallpapers.jpg' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+    .center-form {
+        width: 90%; /* Adjust width based on content size */
+        max-width: 800px; /* Maximum width */
+        padding: 50px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px solid #c798d8; /* Soft purple border */
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(194, 124, 202, 0.2); /* Light purple shadows */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center the form elements */
+        backdrop-filter: blur(10px);
+    }
+    h2 {
+        color: #9a4db1; /* Dark purple color for the heading */
+        text-align: center;
+        font-size: 2.5em; /* Larger font size for the heading */
+    }
+    p {
+        color: #333;
+        font-size: 1.2em; /* Slightly larger font size for better readability */
+        margin-bottom: 15px; /* Add some space between paragraphs */
+    }
+    p strong {
+        color: #9a4db1; /* Dark purple color for strong text */
+    }
+</style>
+{% endblock %}

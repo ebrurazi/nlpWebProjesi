@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="center-form">
+    <h2>Giriş Yap</h2>
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="button-container">
+            <button type="submit" class="color-change-button">Giriş Yap</button>
+        </div>
+    </form>
+    
+    <p>Hesabınız yok mu? <a href="{% url 'signup' %}">Kayıt olun</a>.</p>
+</div>
+{% endblock %}
+
+{% block css %}
+<style>
+    body, html {
+        height: 100%; /* Set the height of the HTML and body to cover the entire viewport */
+        margin: 0; /* Remove default margin */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: url("{% static 'img/wp12478902-japanese-art-4k-wallpapers.jpg' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+    .center-form {
+        width: 90%; /* Adjust width based on content size */
+        max-width: 800px; /* Maximum width */
+        padding: 50px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px solid #c798d8; /* Soft purple border */
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(194, 124, 202, 0.2); /* Light purple shadows */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center the form elements */
+        backdrop-filter: blur(10px);
+    }
+    h2 {
+        color: #9a4db1; /* Dark purple color for the heading */
+        text-align: center;
+        font-size: 2.5em; /* Larger font size for the heading */
+    }
+    form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    input, textarea {
+        width: 100%;
+        max-width: 500px;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #c798d8;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        align-items: center; /* Center the buttons horizontally */
+    }
+    .color-change-button {
+        width: 80%; /* Make buttons take up 80% of the container's width */
+        max-width: 300px; /* Maximum width for buttons */
+        padding: 20px 40px; /* Adjust padding for larger buttons */
+        background-color: #c798d8; /* Initial background color */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none; /* Remove underline */
+        cursor: pointer;
+        font-size: 1.5em; /* Larger font size for the buttons */
+        margin: 15px 0; /* Add vertical margin between buttons */
+        display: flex;
+        justify-content: center; /* Center text horizontally */
+        align-items: center; /* Center text vertically */
+        text-align: center; /* Ensure text is centered */
+        transition: background-color 0.3s; /* Smooth transition for color change */
+    }
+    .color-change-button:hover {
+        background-color: #a56cb1; /* Change background color on hover */
+    }
+    p {
+        text-align: center;
+    }
+</style>
+{% endblock %}
